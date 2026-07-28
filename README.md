@@ -1,2 +1,3 @@
 # TomazTuba.github.io
-Testna spletna stran
+Testna spletna stran v GitHub.
+
