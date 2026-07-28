@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vremenska napoved za Škofjo Loko v živo">
+  <title>Vreme Škofja Loka</title>
+  <style>
+    :root {
+      --bg: #eef7ff;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --text: #17324d;
+      --muted: #667b8f;
+      --primary: #2476c9;
+      --border: rgba(36, 118, 201, 0.14);
+      --shadow: 0 18px 45px rgba(38, 92, 138, 0.13);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(166, 220, 255, 0.7), transparent 35%),
+        linear-gradient(145deg, #f8fcff 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 46px 0 30px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .updated {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 17px;
+      font: inherit;
+      font-weight: 750;
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 8px 20px rgba(36, 118, 201, 0.22);
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .current {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      min-height: 310px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .weather-icon {
+      font-size: clamp(4rem, 10vw, 7rem);
+      line-height: 1;
+      filter: drop-shadow(0 10px 14px rgba(36, 118, 201, 0.14));
+    }
+
+    .condition {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+      font-weight: 750;
+    }
+
+    .temperature {
+      margin: 0;
+      font-size: clamp(4.5rem, 11vw, 8rem);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+      font-weight: 800;
+    }
+
+    .feels {
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .details {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .metric {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(244, 250, 255, 0.92);
+      border: 1px solid var(--border);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 1.15rem;
+    }
+
+    .forecast-wrap {
+      padding: 24px;
+    }
+
+    .forecast {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(115px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .day {
+      min-width: 115px;
+      padding: 18px 14px;
+      text-align: center;
+      border-radius: 18px;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+    }
+
+    .day-name {
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .day-icon {
+      font-size: 2.25rem;
+      margin-bottom: 8px;
+    }
+
+    .temps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .low {
+      color: var(--muted);
+    }
+
+    .rain {
+      margin-top: 9px;
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .status {
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .error {
+      color: #a23333;
+    }
+
+    footer {
+      padding: 18px 4px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding-top: 26px;
+      }
+
+      header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      button {
+        align-self: flex-start;
+      }
+
+      .current {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: 270px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .details {
+        grid-template-columns: 1fr;
+      }
+
+      .hero, .details, .forecast-wrap {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <p class="eyebrow">Vremenska napoved v živo</p>
+        <h1>Škofja Loka</h1>
+        <p class="updated" id="updated">Pridobivanje najnovejših podatkov …</p>
+      </div>
+      <button id="refresh" type="button">Osveži podatke</button>
+    </header>
+
+    <section id="content" aria-live="polite">
+      <div class="card status">Nalagam vremenske podatke …</div>
+    </section>
+
+    <footer>
+      Podatki: Open-Meteo · Napoved se samodejno osveži vsakih 15 minut.
+    </footer>
+  </main>
+
+  <script>
+    const content = document.getElementById("content");
+    const updated = document.getElementById("updated");
+    const refreshButton = document.getElementById("refresh");
+
+    const weatherCodes = {
+      0: ["Jasno", "☀️"],
+      1: ["Pretežno jasno", "🌤️"],
+      2: ["Delno oblačno", "⛅"],
+      3: ["Oblačno", "☁️"],
+      45: ["Megla", "🌫️"],
+      48: ["Megla z ivjem", "🌫️"],
+      51: ["Rahlo rosenje", "🌦️"],
+      53: ["Rosenje", "🌦️"],
+      55: ["Močno rosenje", "🌧️"],
+      56: ["Rahlo poledeno rosenje", "🌧️"],
+      57: ["Poledeno rosenje", "🌧️"],
+      61: ["Rahel dež", "🌦️"],
+      63: ["Dež", "🌧️"],
+      65: ["Močan dež", "🌧️"],
+      66: ["Rahel leden dež", "🌧️"],
+      67: ["Leden dež", "🌧️"],
+      71: ["Rahlo sneženje", "🌨️"],
+      73: ["Sneženje", "🌨️"],
+      75: ["Močno sneženje", "❄️"],
+      77: ["Snežna zrna", "🌨️"],
+      80: ["Rahle plohe", "🌦️"],
+      81: ["Plohe", "🌧️"],
+      82: ["Močne plohe", "⛈️"],
+      85: ["Rahle snežne plohe", "🌨️"],
+      86: ["Močne snežne plohe", "❄️"],
+      95: ["Nevihta", "⛈️"],
+      96: ["Nevihta s točo", "⛈️"],
+      99: ["Močna nevihta s točo", "⛈️"]
+    };
+
+    function weatherInfo(code) {
+      return weatherCodes[code] || ["Neznano vreme", "🌡️"];
+    }
+
+    function formatDay(dateString, index) {
+      if (index === 0) return "Danes";
+      if (index === 1) return "Jutri";
+      return new Intl.DateTimeFormat("sl-SI", { weekday: "short" })
+        .format(new Date(dateString + "T12:00:00"));
+    }
+
+    function compassDirection(degrees) {
+      const directions = ["S", "SV", "V", "JV", "J", "JZ", "Z", "SZ"];
+      return directions[Math.round(degrees / 45) % 8];
+    }
+
+    async function loadWeather() {
+      refreshButton.disabled = true;
+      updated.textContent = "Pridobivanje najnovejših podatkov …";
+
+      try {
+        const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=%C5%A0kofja%20Loka&count=1&language=sl&format=json";
+        const geoResponse = await fetch(geoUrl);
+        if (!geoResponse.ok) throw new Error("Lokacije ni bilo mogoče pridobiti.");
+
+        const geoData = await geoResponse.json();
+        if (!geoData.results?.length) throw new Error("Škofje Loke ni bilo mogoče najti.");
+
+        const { latitude, longitude } = geoData.results[0];
+        const params = new URLSearchParams({
+          latitude,
+          longitude,
+          current: [
+            "temperature_2m",
+            "relative_humidity_2m",
+            "apparent_temperature",
+            "is_day",
+            "precipitation",
+            "weather_code",
+            "cloud_cover",
+            "wind_speed_10m",
+            "wind_direction_10m"
+          ].join(","),
+          daily: [
+            "weather_code",
+            "temperature_2m_max",
+            "temperature_2m_min",
+            "precipitation_probability_max"
+          ].join(","),
+          timezone: "Europe/Ljubljana",
+          forecast_days: "7"
+        });
+
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+        if (!response.ok) throw new Error("Vremenski podatki trenutno niso dosegljivi.");
+
+        const data = await response.json();
+        renderWeather(data);
+      } catch (error) {
+        content.innerHTML = `
+          <div class="card status error">
+            <strong>Napaka pri nalaganju.</strong><br>
+            ${error.message}<br><br>
+            Preverite internetno povezavo in poskusite znova.
+          </div>`;
+        updated.textContent = "Podatki niso bili osveženi.";
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function renderWeather(data) {
+      const current = data.current;
+      const [condition, icon] = weatherInfo(current.weather_code);
+
+      const days = data.daily.time.map((date, index) => {
+        const [dayCondition, dayIcon] = weatherInfo(data.daily.weather_code[index]);
+        return `
+          <article class="day" title="${dayCondition}">
+            <div class="day-name">${formatDay(date, index)}</div>
+            <div class="day-icon" aria-label="${dayCondition}">${dayIcon}</div>
+            <div class="temps">
+              <span>${Math.round(data.daily.temperature_2m_max[index])}°</span>
+              <span class="low">${Math.round(data.daily.temperature_2m_min[index])}°</span>
+            </div>
+            <div class="rain">💧 ${data.daily.precipitation_probability_max[index] ?? 0} %</div>
+          </article>`;
+      }).join("");
+
+      content.innerHTML = `
+        <div class="current">
+          <section class="card hero">
+            <div class="hero-top">
+              <div>
+                <p class="condition">${condition}</p>
+                <p class="feels">${current.is_day ? "Dnevne razmere" : "Nočne razmere"}</p>
+              </div>
+              <div class="weather-icon" aria-hidden="true">${icon}</div>
+            </div>
+            <div>
+              <p class="temperature">${Math.round(current.temperature_2m)}°</p>
+              <p class="feels">Občutek: ${Math.round(current.apparent_temperature)} °C</p>
+            </div>
+          </section>
+
+          <section class="card details">
+            <div class="metric">
+              <div class="metric-label">Vlažnost</div>
+              <div class="metric-value">${current.relative_humidity_2m} %</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Veter</div>
+              <div class="metric-value">${Math.round(current.wind_speed_10m)} km/h ${compassDirection(current.wind_direction_10m)}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Padavine</div>
+              <div class="metric-value">${current.precipitation} mm</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Oblačnost</div>
+              <div class="metric-value">${current.cloud_cover} %</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card forecast-wrap">
+          <h2>Napoved za naslednjih 7 dni</h2>
+          <div class="forecast">${days}</div>
+        </section>`;
+
+      const updateTime = new Date(current.time);
+      updated.textContent = `Zadnji podatek: ${new Intl.DateTimeFormat("sl-SI", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      }).format(updateTime)}`;
+    }
+
+    refreshButton.addEventListener("click", loadWeather);
+    loadWeather();
+    setInterval(loadWeather, 15 * 60 * 1000);
+  </script>
+</body>
+</html>
