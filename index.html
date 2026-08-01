@@ -341,6 +341,21 @@
         .format(new Date(dateString + "T12:00:00"));
     }
 
+    function formatNumericDateTime(date) {
+      const dateParts = new Intl.DateTimeFormat("sl-SI", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+      }).formatToParts(date);
+      const part = type => dateParts.find(item => item.type === type).value;
+      const time = new Intl.DateTimeFormat("sl-SI", {
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(date);
+
+      return `${part("day")}.${part("month")}.${part("year")} ob ${time}`;
+    }
+
     function compassDirection(degrees) {
       const directions = ["S", "SV", "V", "JV", "J", "JZ", "Z", "SZ"];
       return directions[Math.round(degrees / 45) % 8];
@@ -461,10 +476,7 @@
         </section>`;
 
       const updateTime = new Date(current.time);
-      updated.textContent = `Zadnji podatek: ${new Intl.DateTimeFormat("sl-SI", {
-        dateStyle: "medium",
-        timeStyle: "short"
-      }).format(updateTime)}`;
+      updated.textContent = `Zadnji podatek: ${formatNumericDateTime(updateTime)}`;
     }
 
     refreshButton.addEventListener("click", loadWeather);
